@@ -84,7 +84,7 @@ function env_prep()
     #                                        # nawet jeśli po zbudowaniu odtwarzałem je do poprzednich wartości
 
     # 1. Pętla getopts
-    while getopts "ctl" opt; do
+    while getopts "ctlp" opt; do
     case "$opt" in
         c)
             # just clean the env #       single makes exe -> ct cleans test, cl cleans lib
@@ -110,7 +110,11 @@ function env_prep()
 
                 export FLAG_BUILDING_LIBRARY="Yes"
             }
-            break
+        ;;
+        p)
+            {
+                export FLAG_BUILD_PYTHON_MODULE="Yes"
+            }
         ;;
         \?)
         echo "Error: $0 getopts switch -$OPTARG" >&2

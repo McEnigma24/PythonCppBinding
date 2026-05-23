@@ -9,6 +9,7 @@ RUN apt-get install -y --no-install-recommends ca-certificates
 RUN apt-get install -y --no-install-recommends python3
 RUN apt-get install -y --no-install-recommends python3-pip
 RUN apt-get install -y --no-install-recommends python-is-python3
+RUN apt-get install -y --no-install-recommends libgomp1
 RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace

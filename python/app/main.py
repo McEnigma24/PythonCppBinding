@@ -9,8 +9,8 @@ def main() -> None:
     except ImportError as e:
         print(
             "Nie można zaimportować python_cpp_binding.\n"
-            "Upewnij się, że C++ zbudowany jest z -p (BUILD_PYTHON_MODULE=ON) "
-            "i że PYTHONPATH wskazuje na katalog z plikiem .so (docker/run.sh robi to automatycznie).",
+            "Upewnij się, że C++ zbudowany jest z **-p** (jeden moduł .so z całym _src) "
+            "i że PYTHONPATH wskazuje na katalog build (docker/run.sh ustawia to za Ciebie).",
             file=sys.stderr,
         )
         raise e

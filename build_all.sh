@@ -4,7 +4,7 @@ set -eo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "=== [1/3] C++ (Docker, flaga -p = moduł pybind11) ==="
+echo "=== [1/3] C++ (Docker: -p = jeden moduł .so: całe _src + pybind w _py) ==="
 ( cd "$ROOT/cpp" && ./docker/compile.sh -p )
 
 echo ""

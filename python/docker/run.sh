@@ -27,6 +27,7 @@ docker run --rm -it \
   -v "$CPP_BUILD:/cpp_build:ro" \
   -w /workspace \
   -e PYTHONPATH=/cpp_build \
+  -e LD_LIBRARY_PATH=/cpp_build \
   "$DOCKER_FULL_IMG_NAME" \
   python3 app/main.py "$@" 2>&1 | tee "$LOG_run"
 

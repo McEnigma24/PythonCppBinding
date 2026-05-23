@@ -7,7 +7,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TERM=xterm-256color
 
 RUN apt-get update -y && apt-get upgrade -y
-RUN apt-get install -y --no-install-recommends ca-certificates
 RUN apt-get install -y --no-install-recommends libssl3
 RUN apt-get install -y --no-install-recommends libcurl4
 RUN apt-get install -y --no-install-recommends libprotobuf23

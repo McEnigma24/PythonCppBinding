@@ -114,7 +114,7 @@ endif()
 option(BUILD_PYTHON_MODULE "Build pybind11 extension module for Python" OFF)
 
 if(BUILD_PYTHON_MODULE)
-    message(STATUS "Building Python extension (pybind11)")
+    message(STATUS "Building Python extension (pybind11) — jeden plik .so: _src + _py/binding.cpp (bez BUILD_EXECUTABLE → bez main)")
     FetchContent_Declare(
         pybind11
         GIT_REPOSITORY https://github.com/pybind/pybind11.git
@@ -126,8 +126,11 @@ if(BUILD_PYTHON_MODULE)
     pybind11_add_module(
         python_cpp_binding
         MODULE
+        ${SOURCES}
         "${CMAKE_CURRENT_SOURCE_DIR}/_py/binding.cpp"
     )
+    target_compile_definitions(python_cpp_binding PRIVATE LINUX)
+    target_link_libraries(python_cpp_binding PRIVATE ${ALL_LIBRARIES})
 endif()
 
 option(CTEST_ACTIVE "Testing is active" OFF)  # default value - could be overwritten by provided FLAG
