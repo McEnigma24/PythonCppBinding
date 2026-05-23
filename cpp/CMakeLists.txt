@@ -66,9 +66,7 @@ FetchContent_MakeAvailable(core)
 set(ALL_LIBRARIES ${ALL_LIBRARIES} core)
 include_directories(${core_SOURCE_DIR}/_inc)
 
-# add_subdirectory(external/core)
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/core/_inc)
-# set(ALL_LIBRARIES ${ALL_LIBRARIES} core)
+
 
 # EXAMPLE - ssd1306 #
 # include(FetchContent)
@@ -111,6 +109,25 @@ else()
     target_compile_definitions(${TARGET_NAME} PRIVATE LINUX BUILD_EXECUTABLE)
     # set_target_properties(${TARGET_NAME} PROPERTIES ${COMPILE_FLAGS} ${LINK_FLAGS})
     target_link_libraries(${TARGET_NAME} PUBLIC ${ALL_LIBRARIES})
+endif()
+
+option(BUILD_PYTHON_MODULE "Build pybind11 extension module for Python" OFF)
+
+if(BUILD_PYTHON_MODULE)
+    message(STATUS "Building Python extension (pybind11)")
+    FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git
+        GIT_TAG        v2.13.6
+        GIT_SHALLOW    TRUE
+        UPDATE_DISCONNECTED ON
+    )
+    FetchContent_MakeAvailable(pybind11)
+    pybind11_add_module(
+        python_cpp_binding
+        MODULE
+        "${CMAKE_CURRENT_SOURCE_DIR}/_py/binding.cpp"
+    )
 endif()
 
 option(CTEST_ACTIVE "Testing is active" OFF)  # default value - could be overwritten by provided FLAG

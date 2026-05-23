@@ -1,0 +1,16 @@
+# ✅ ❌ #
+
+set -eo pipefail
+
+export DIR_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_img_path="${DIR_ROOT#/}"
+_filter="$(printf '%s' "$_img_path" | LC_ALL=C tr -c 'a-zA-Z0-9' '-' | tr -s '-')"
+export DOCKER_IMG_PREFIX="${_filter,,}---"
+
+export DIR_LOG="log"
+export DIR_OUTPUT="output"
+
+export LOG_run="$DIR_ROOT/$DIR_LOG/run.log"
+
+function clear_dir() { if [ -d "$1" ]; then rm -rf "$1"; fi; mkdir -p "$1"; }; export -f clear_dir
+function create_dir() { if [ ! -d "$1" ]; then mkdir -p "$1"; fi; }; export -f create_dir

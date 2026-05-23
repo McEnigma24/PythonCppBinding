@@ -38,6 +38,8 @@ RUN apt-get install -y --no-install-recommends libprotobuf-dev
 RUN apt-get install -y --no-install-recommends protobuf-compiler
 RUN apt-get install -y --no-install-recommends git
 RUN apt-get install -y --no-install-recommends ca-certificates
+RUN apt-get install -y --no-install-recommends python3
+RUN apt-get install -y --no-install-recommends python3-dev
 RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace

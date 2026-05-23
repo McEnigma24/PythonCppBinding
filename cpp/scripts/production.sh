@@ -23,6 +23,11 @@ function build_all()
         CMAKE_FLAGS="$CMAKE_FLAGS -DTEMPLATE___BUILD_LIBRARY=ON"
     }
     fi
+    if [ "$FLAG_BUILD_PYTHON_MODULE" == "Yes" ]; then
+    {
+        CMAKE_FLAGS="$CMAKE_FLAGS -DBUILD_PYTHON_MODULE=ON"
+    }
+    fi
 
     cmake -S . -B $DIR_BUILD $CMAKE_FLAGS;
     cmake --build $DIR_BUILD;
