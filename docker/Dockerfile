@@ -78,6 +78,7 @@ RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y --no-install-recommends python3
 RUN apt-get install -y --no-install-recommends python3-pip
 RUN apt-get install -y --no-install-recommends python-is-python3
+RUN pip3 install --no-cache-dir numpy
 RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace

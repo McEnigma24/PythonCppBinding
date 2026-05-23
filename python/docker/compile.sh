@@ -1,12 +1,11 @@
 #!/bin/bash
-set -eo pipefail
+source config
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYTHON_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$PYTHON_ROOT"
 
-source config
 
 DOCKER_TARGET="python-runner"
 DOCKER_FULL_IMG_NAME="${DOCKER_IMG_PREFIX}${DOCKER_TARGET}"

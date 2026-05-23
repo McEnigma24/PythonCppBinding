@@ -1,2 +1,17 @@
-Wynik cpp_add(40, 2): 42
-Wynik cpp_sub(40, 2): 38
+cpp_add(40, 2): 42
+cpp_sub(40, 2): 38
+Matrix(2, 3, 1.0) shape: (2, 3)
+np.asarray(m) (widok tej samej pamięci):
+ [[1. 1. 1.]
+ [1. 1. 1.]]
+po m[0,0]=42, widok numpy:
+ [[42.  1.  1.]
+ [ 1.  1.  1.]]
+matrix_sum(m): 47.0
+Matrix z numpy [[1,2],[3,4]] suma: 10.0
+Traceback (most recent call last):
+  File "/workspace/app/main.py", line 29, in <module>
+    main()
+  File "/workspace/app/main.py", line 25, in main
+    df
+NameError: name 'df' is not defined

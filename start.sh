@@ -1,6 +1,5 @@
 #!/bin/bash
-# Kompilacja rozszerzenia C++ (pybind11), potem obraz Dockera Pythona i uruchomienie skryptu.
-set -eo pipefail
+source config
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 function my_sleep() { sleep 0; }

@@ -22,6 +22,8 @@ def main() -> None:
     from_np = native.Matrix(np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float64))
     print("Matrix z numpy [[1,2],[3,4]] suma:", native.matrix_sum(from_np))
 
+    df
+
 
 if __name__ == "__main__":
     main()

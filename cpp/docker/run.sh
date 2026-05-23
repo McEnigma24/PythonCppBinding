@@ -13,12 +13,12 @@ DOCKER_FULL_IMG_NAME="${DOCKER_IMG_PREFIX}${DOCKER_TARGET}"
 
 
 # BUILD #
-clear
+clear;
 docker build -f "$DOCKERFILE" --target "$DOCKER_TARGET" -t "$DOCKER_FULL_IMG_NAME" "$REPO_ROOT"
 docker image prune -f
 
 # RUN #
-clear; clear_dir "$DIR_OUTPUT"; mkdir -p "$(dirname "$LOG_run")"
+clear; clear_dir "$DIR_OUTPUT"; mkdir -p "$(dirname "$LOG_run")"; set +eo pipefail
 docker run --rm -it \
   "$DOCKER_FULL_IMG_NAME" \
   bash -lc 'exec /app/build/*.exe' 2>&1 > "$LOG_run"
