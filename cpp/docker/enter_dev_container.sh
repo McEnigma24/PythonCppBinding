@@ -23,7 +23,7 @@ docker run --rm -it \
   -v "$REPO_ROOT/cpp:/workspace" \
   -w /workspace \
   "$DOCKER_FULL_IMG_NAME" \
-  bash -l
+  bash
 
 docker container prune -f
 clear

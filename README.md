@@ -1,54 +1,105 @@
 # Python ↔ C++ (pybind11)
 
+Projekt **PythonCppBinding**: C++ (`cpp/`) z modułem **pybind11**, osobny runtime **Python** (`python/`), wspólne obrazy **Docker** (`docker/`).
+
 ## Idea
 
-1. **C++** z **`-p`**: jeden artefakt **dla Pythona** — plik **`python_cpp_binding.cpython-…-linux-gnu.so`** w `cpp/build/`. W środku jest skompilowane całe **`_src`** (w tym `main.cpp`, ale **bez** `main()` — target modułu nie definiuje `BUILD_EXECUTABLE`) oraz **`_py/binding.cpp`**. Zależności typu **core** trafiają do tego samego linkowania (np. statyczna `libcore.a` w środku, a np. **OpenMP** z systemu). Domyślnie CMake buduje **też** `TEMPLATE.exe` z tych samych źródeł (osobny target) — to nie jest wymagane do działania Pythona, ale zostaje w `build/` obok modułu.
-2. **Python** montuje `cpp/build` i ustawia **`PYTHONPATH=/cpp_build`**, żeby **`import python_cpp_binding`** znalazł ten plik po nazwie modułu (suffix `.cpython-310-…` jest normalny — to nadal moduł **`python_cpp_binding`**).
+1. **C++ z `-p`**: jeden artefakt **dla Pythona** — plik **`python_cpp_binding.cpython-…-linux-gnu.so`** w `cpp/build/`. W środku jest skompilowane całe **`_src`** (w tym `main.cpp`, ale **bez** `main()` — target modułu **nie** definiuje `BUILD_EXECUTABLE`) oraz **`_py/binding.cpp`**. Zależności typu **core** są linkowane w tym samym obrazie binarnym modułu (np. statyczna `libcore.a`); biblioteki systemowe (np. **OpenMP** / `libgomp`) biorą się z obrazu Dockera. Oprócz tego CMake domyślnie buduje też **`TEMPLATE.exe`** — osobny target; do Pythona wystarcza moduł `.so` w `cpp/build/`.
+2. **Python**: kontener **`python-runner`** montuje **`cpp/build`** jako **`/cpp_build`**, ustawia **`PYTHONPATH`** i **`LD_LIBRARY_PATH`**, żeby **`import python_cpp_binding`** i ewentualne zależności dynamiczne działały bez kopiowania plików do obrazu Pythona.
 
-Ważne: moduł `.so` musi być zbudowany w środowisku **zgodnym** z tym, w którym go ładujesz (wspólna baza **`docker/Dockerfile`** → stage **`runtime-base`**, potem **`dev-env`** vs **`python-runner`**).
+**Spójność ABI:** moduł buduj w tym samym typie środowiska, w którym go uruchamiasz (stąd **Ubuntu 22.04** we wspólnej bazie Dockera).
 
 ### Skąd `import python_cpp_binding` wie, który plik otworzyć?
 
-Nazwa modułu w Pythonie to **`python_cpp_binding`**. Loader szuka pliku spełniającego reguły PEP 3149, np. **`python_cpp_binding.cpython-310-x86_64-linux-gnu.so`** w katalogach z `sys.path` (w tym wpisanych przez **`PYTHONPATH`**). Długi suffix jest **normalny** — to nadal ten sam moduł; w kodzie zawsze piszesz `import python_cpp_binding`. Po załadowaniu wywołujesz np. `native.add(...)` — to wołanie idzie do kodu C++ zarejestrowanego w `_py/binding.cpp` (`PYBIND11_MODULE` / `m.def`).
+Nazwa modułu to **`python_cpp_binding`**. Loader szuka pliku wg PEP 3149 (np. **`python_cpp_binding.cpython-310-x86_64-linux-gnu.so`**) w **`sys.path`**, m.in. po **`PYTHONPATH=/cpp_build`**. Długi suffix jest **normalny** — w kodzie zawsze **`import python_cpp_binding`**. Wywołania typu **`native.add(...)`** idą do C++ zarejestrowanego w **`_py/binding.cpp`** (`PYBIND11_MODULE` / `m.def`).
 
-## Szybki start (wszystko naraz)
+---
 
-Z katalogu repozytorium:
+## Struktura
+
+| Ścieżka | Rola |
+|---------|------|
+| `docker/Dockerfile` | Jeden multi-stage Dockerfile: **`runtime-base`** → **`dev-env`** / **`runner`** / **`python-runner`** (szczegóły: [`docker/README.md`](docker/README.md)) |
+| `cpp/` | CMake, `_src/`, `_inc/`, `_py/binding.cpp`, `docker/compile.sh`, `docker/start.sh`, … |
+| `python/` | `app/main.py`, `docker/compile.sh`, `docker/run.sh` |
+| `start.sh` | Jednym poleceniem: C++ **`-p`** → obraz Pythona → `python3 app/main.py` |
+
+---
+
+## Szybki start
+
+Z katalogu **`PythonCppBinding`**:
 
 ```bash
-chmod +x build_all.sh cpp/docker/*.sh cpp/scripts/*.sh python/docker/*.sh
-./build_all.sh
+chmod +x start.sh cpp/docker/*.sh cpp/scripts/*.sh python/docker/*.sh
+./start.sh
 ```
+
+Opcjonalnie (powłoka interaktywna w **`dev-env`** z tym samym montowaniem co przy kompilacji):
+
+```bash
+chmod +x cpp/docker/enter_dev_container.sh
+cd cpp && ./docker/enter_dev_container.sh
+```
+
+---
 
 ## Krok po kroku
 
-- Tylko C++ (jeden `.so` dla Pythona — całe `_src` + binding w jednym module):
+### Cały pipeline (root)
 
-  ```bash
-  cd cpp && ./docker/compile.sh -p
-  ```
+```bash
+./start.sh [argumenty przekazywane do python/app/main.py]
+```
 
-- Tylko obraz Pythona:
+### Tylko C++ w Dockerze (`dev-env`)
 
-  ```bash
-  cd python && ./docker/compile.sh
-  ```
+Z katalogu **`cpp`**:
 
-- Uruchomienie Pythona (wymaga już zbudowanego `cpp/build` z modułem):
+```bash
+./docker/compile.sh          # samo exe (+ opcjonalnie inne flagi)
+./docker/compile.sh -p       # + moduł pybind11 (jeden .so z `_src` + binding)
+./docker/compile.sh -c       # czyści `build/` przed kolejnymi opcjami (getopts)
+```
 
-  ```bash
-  cd python && ./docker/run.sh
-  ```
+Log z **`production.sh`** jest zapisywany w **`cpp/log/start.log`** (`tee` w kontenerze) i na końcu **`compile.sh`** wypisuje go ponownie wraz z **SUCCESS** / **FAILED**.
+
+### Flagi przekazywane do `docker/start.sh` (getopts)
+
+| Flaga | Znaczenie |
+|-------|-----------|
+| `-c` | Czyści katalog **`build/`** |
+| `-t` | Tryb testów CMake (**`CTEST_ACTIVE`**) |
+| `-l` | Budowa biblioteki zamiast exe (**`BUILD_LIBRARY`**) — zgodnie z `CMakeLists.txt` |
+| `-p` | Moduł Pythona (**`BUILD_PYTHON_MODULE`**) |
+
+Uwaga: w **`docker/start.sh`** opcje **`-t`**, **`-l`** i **`-p`** kończą pętlę **`getopts`** przez **`break`** — w **jednym** wywołaniu zadziała tylko **pierwsza** z nich w kolejności skanowania (np. `-lp` ustawi tylko **`-l`**). Łączenie flag: osobne wywołania albo zmiana skryptu (usunięcie `break`).
+
+### Obraz Pythona
+
+```bash
+cd python && ./docker/compile.sh
+```
+
+### Uruchomienie aplikacji Python (wymaga `cpp/build/` z modułem po **`compile.sh -p`**)
+
+```bash
+cd python && ./docker/run.sh
+```
+
+---
 
 ## Gdzie dopinać własny kod
 
 | Cel | Plik |
 |-----|------|
-| Funkcje / klasy widoczne w Pythonie | `cpp/_py/binding.cpp` (makro `PYBIND11_MODULE`) |
-| Logika C++ (w tym generowana) | np. nowe `.cpp` w `cpp/_src/`, potem `binding.cpp` wywołuje te API |
-| Włączenie budowy modułu w CMake | `BUILD_PYTHON_MODULE` (`./docker/compile.sh -p`) — jeden plik `python_cpp_binding*.so` z całym `_src` |
+| API widoczne w Pythonie | `cpp/_py/binding.cpp` (`PYBIND11_MODULE`, `m.def`, …) |
+| Logika C++ (także generowana) | `cpp/_src/`, `cpp/_inc/` — wywołania z `binding.cpp` |
+| CMake (exe / testy / moduł) | `cpp/CMakeLists.txt`, opcje **`BUILD_PYTHON_MODULE`**, **`BUILD_LIBRARY`**, **`CTEST_ACTIVE`** |
+
+---
 
 ## Alternatywy (na później)
 
-- **ctypes / C ABI**: eksport `extern "C"` z biblioteki `.so`, bez pybind11 — mniej wygodne typy.
-- **setuptools + scikit-build-core**: pakiet pip z natywnym modułem — wygodne przy publikacji, większy narzut konfiguracji.
+- **ctypes / C ABI** — bez pybind11, więcej ręcznej roboty przy typach.
+- **setuptools / scikit-build-core** — pakiet pip z rozszerzeniem, wygodniejsze przy publikacji.

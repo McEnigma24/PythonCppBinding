@@ -14,7 +14,7 @@ DOCKER_TARGET="python-runner"
 DOCKER_FULL_IMG_NAME="${DOCKER_IMG_PREFIX}${DOCKER_TARGET}"
 
 if [ ! -d "$CPP_BUILD" ]; then
-  echo "❌ Brak katalogu $CPP_BUILD — najpierw zbuduj C++ (np. ./build_all.sh lub cpp/docker/compile.sh -p)."
+  echo "❌ Brak katalogu $CPP_BUILD — najpierw zbuduj C++ (np. ./start.sh z katalogu PythonCppBinding lub: cd cpp && ./docker/compile.sh -p)."
   exit 1
 fi
 
@@ -29,7 +29,7 @@ docker run --rm -it \
   -e PYTHONPATH=/cpp_build \
   -e LD_LIBRARY_PATH=/cpp_build \
   "$DOCKER_FULL_IMG_NAME" \
-  python3 app/main.py "$@" 2>&1 | tee "$LOG_run"
+  python3 app/main.py "$@" 2>&1 > "$LOG_run"
 
 run_status="${PIPESTATUS[0]}"
 docker container prune -f
