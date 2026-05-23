@@ -10,7 +10,6 @@ source config
 # # # # # # # # # # # # # # # #
 
 var_start=""; var_end="";
-SCRIPT="./run.sh"
 
 function install_hook()
 {
@@ -110,11 +109,14 @@ function env_prep()
 
                 export FLAG_BUILDING_LIBRARY="Yes"
             }
+            break
         ;;
         p)
+            # Moduł Python (pybind11) — budowany razem z projektem C++ w tym samym obrazie Dockera (spójne ABI).
             {
                 export FLAG_BUILD_PYTHON_MODULE="Yes"
             }
+            break
         ;;
         \?)
         echo "Error: $0 getopts switch -$OPTARG" >&2
@@ -134,13 +136,16 @@ function env_prep()
 
 env_prep "$@"
 
-install_packages
+# install_packages
 
 timer_start
 {
-    cd scripts
-    script -q -c "$SCRIPT 2>&1" /dev/null | tee $LOG
+    cd scripts || exit 1
+    ./production.sh 2>&1 | tee "$LOG_start"
+    compilation_status=$?
 }
 timer_end
 
-timer_print
+# timer_print
+
+exit $compilation_status

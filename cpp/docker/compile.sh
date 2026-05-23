@@ -1,7 +1,10 @@
 #!/bin/bash
 source config
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+DOCKERFILE="$REPO_ROOT/docker/Dockerfile"
 
+mkdir -p "$REPO_ROOT/cpp/input" "$REPO_ROOT/cpp/run_time_config"
 
 # DOCKER_IMG_PREFIX
 DOCKER_TARGET="dev-env"
@@ -11,16 +14,20 @@ DOCKER_FULL_IMG_NAME="${DOCKER_IMG_PREFIX}${DOCKER_TARGET}"
 
 # BUILD #
 clear
-docker build --target "$DOCKER_TARGET" -t "$DOCKER_FULL_IMG_NAME" .
+docker build -f "$DOCKERFILE" --target "$DOCKER_TARGET" -t "$DOCKER_FULL_IMG_NAME" "$REPO_ROOT"
 docker image prune -f
+
+sleep 3
 
 # RUN #
 clear; clear_dir "$DIR_LOG"
 docker run --rm -it \
-  -v "$(pwd):/workspace" \
+  -v "$REPO_ROOT/cpp:/workspace" \
   -w /workspace \
   "$DOCKER_FULL_IMG_NAME" \
   bash "./docker/start.sh" "$@"
+
+sleep 3
 
 compilation_status=$?
 docker container prune -f

@@ -5,7 +5,7 @@
 1. **C++** z **`-p`**: jeden artefakt **dla Pythona** — plik **`python_cpp_binding.cpython-…-linux-gnu.so`** w `cpp/build/`. W środku jest skompilowane całe **`_src`** (w tym `main.cpp`, ale **bez** `main()` — target modułu nie definiuje `BUILD_EXECUTABLE`) oraz **`_py/binding.cpp`**. Zależności typu **core** trafiają do tego samego linkowania (np. statyczna `libcore.a` w środku, a np. **OpenMP** z systemu). Domyślnie CMake buduje **też** `TEMPLATE.exe` z tych samych źródeł (osobny target) — to nie jest wymagane do działania Pythona, ale zostaje w `build/` obok modułu.
 2. **Python** montuje `cpp/build` i ustawia **`PYTHONPATH=/cpp_build`**, żeby **`import python_cpp_binding`** znalazł ten plik po nazwie modułu (suffix `.cpython-310-…` jest normalny — to nadal moduł **`python_cpp_binding`**).
 
-Ważne: moduł `.so` musi być zbudowany w środowisku **zgodnym** z tym, w którym go ładujesz (stąd ten sam Ubuntu 22.04 w obu Dockerfile’ach i budowanie modułu w kontenerze C++).
+Ważne: moduł `.so` musi być zbudowany w środowisku **zgodnym** z tym, w którym go ładujesz (wspólna baza **`docker/Dockerfile`** → stage **`runtime-base`**, potem **`dev-env`** vs **`python-runner`**).
 
 ### Skąd `import python_cpp_binding` wie, który plik otworzyć?
 

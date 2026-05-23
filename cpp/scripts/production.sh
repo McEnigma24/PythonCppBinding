@@ -61,7 +61,7 @@ function copy_exe()
     if [ "$FLAG_BUILDING_LIBRARY" != "Yes" ]; then
     {
         echo -e " ✅\n";
-        cp $DIR_BUILD/*.exe $DIR_TARGET;
+        cp $DIR_BUILD/*.exe $DIR_TARGET || echo -e "\nWe should copy, but we are unable to find .exe binary file" && exit 1;
     }
     else
     {

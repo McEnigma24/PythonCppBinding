@@ -109,12 +109,14 @@ function env_prep()
 
                 export FLAG_BUILDING_LIBRARY="Yes"
             }
+            break
         ;;
         p)
             # Moduł Python (pybind11) — budowany razem z projektem C++ w tym samym obrazie Dockera (spójne ABI).
             {
                 export FLAG_BUILD_PYTHON_MODULE="Yes"
             }
+            break
         ;;
         \?)
         echo "Error: $0 getopts switch -$OPTARG" >&2
