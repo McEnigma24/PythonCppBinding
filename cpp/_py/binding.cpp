@@ -55,6 +55,7 @@ PYBIND11_MODULE(python_cpp_binding, m)
     m.def("add", &cpp_add);
     m.def("sub", &cpp_sub);
     m.def("matrix_sum", &matrix_sum, "Suma wszystkich elementów (przykład: funkcja przyjmuje Matrix z Pythona).");
+    m.def("matrix_add", &matrix_add, py::arg("a"), py::arg("b"), "A + B (nowa macierz); te same wymiary.");
 
     py::class_<Matrix>(m, "Matrix", py::buffer_protocol())
         .def(py::init<std::size_t, std::size_t>(), py::arg("rows"), py::arg("cols"), "Pusta macierz 0.0")
@@ -76,6 +77,11 @@ PYBIND11_MODULE(python_cpp_binding, m)
                                     static_cast<ssize_t>(sizeof(double))});
         })
         .def_property_readonly("shape", [](const Matrix& mat) { return py::make_tuple(mat.rows(), mat.cols()); })
+        .def(
+            "__add__",
+            [](const Matrix& self, const Matrix& other) { return matrix_add(self, other); },
+            py::arg("other"),
+            "self + other (dwie macierze native.Matrix)")
         .def(
             "__getitem__",
             [](const Matrix& mat, py::tuple key) {

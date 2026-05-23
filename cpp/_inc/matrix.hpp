@@ -47,5 +47,23 @@ private:
     std::vector<double> storage_;
 };
 
+/// Suma elementów; wymiary a i b muszą być identyczne.
+inline Matrix matrix_add(const Matrix& a, const Matrix& b)
+{
+    if (a.rows() != b.rows() || a.cols() != b.cols())
+    {
+        throw std::invalid_argument("matrix_add: macierze muszą mieć ten sam kształt (rows, cols)");
+    }
+    Matrix out(a.rows(), a.cols());
+    for (std::size_t i = 0; i < a.rows(); ++i)
+    {
+        for (std::size_t j = 0; j < a.cols(); ++j)
+        {
+            out.at(i, j) = a.at(i, j) + b.at(i, j);
+        }
+    }
+    return out;
+}
+
 inline int cpp_add(int a, int b) { return a + b; }
 inline int cpp_sub(int a, int b) { return a - b; }
