@@ -17,8 +17,6 @@ clear
 docker build -f "$DOCKERFILE" --target "$DOCKER_TARGET" -t "$DOCKER_FULL_IMG_NAME" "$REPO_ROOT"
 docker image prune -f
 
-sleep 3
-
 # RUN #
 clear; clear_dir "$DIR_LOG"
 docker run --rm -it \
@@ -26,8 +24,6 @@ docker run --rm -it \
   -w /workspace \
   "$DOCKER_FULL_IMG_NAME" \
   bash "./docker/start.sh" "$@"
-
-sleep 3
 
 compilation_status=$?
 docker container prune -f

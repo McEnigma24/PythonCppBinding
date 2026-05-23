@@ -18,8 +18,7 @@ docker build -f "$DOCKERFILE" --target "$DOCKER_TARGET" -t "$DOCKER_FULL_IMG_NAM
 docker image prune -f
 
 # RUN #
-clear; clear_dir "$DIR_OUTPUT"
-mkdir -p "$(dirname "$LOG_run")"
+clear; clear_dir "$DIR_OUTPUT"; mkdir -p "$(dirname "$LOG_run")"
 docker run --rm -it \
   "$DOCKER_FULL_IMG_NAME" \
   bash -lc 'exec /app/build/*.exe' 2>&1 > "$LOG_run"

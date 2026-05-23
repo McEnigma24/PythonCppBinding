@@ -90,6 +90,7 @@ function env_prep()
             {
                 clear_dir "$DIR_BUILD"
             }
+            break
         ;;
         t)
             # Testing #
