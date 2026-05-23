@@ -95,6 +95,14 @@ cd python && ./docker/run.sh
 |-----|------|
 | API widoczne w Pythonie | `cpp/_py/binding.cpp` (`PYBIND11_MODULE`, `m.def`, …) |
 | Logika C++ (także generowana) | `cpp/_src/`, `cpp/_inc/` — wywołania z `binding.cpp` |
+
+### Przykład: obiekt `Matrix` ↔ NumPy
+
+Klasa **`Matrix`** (`cpp/_inc/matrix.hpp`) jest zarejestrowana w `binding.cpp` z **`py::buffer_protocol()`**, więc:
+
+- **`np.asarray(matrix)`** daje **widok** tej samej pamięci co obiekt C++ (bez kopii bufora).
+- **`native.Matrix(numpy_array_2d)`** buduje kopię z `ndarray` `float64` o **`ndim == 2`**.
+- Funkcje C++ mogą przyjmować **`const Matrix&`** (np. `matrix_sum`) — z Pythona przekazujesz ten sam typ obiektu.
 | CMake (exe / testy / moduł) | `cpp/CMakeLists.txt`, opcje **`BUILD_PYTHON_MODULE`**, **`BUILD_LIBRARY`**, **`CTEST_ACTIVE`** |
 
 ---
